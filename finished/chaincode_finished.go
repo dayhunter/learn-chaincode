@@ -676,6 +676,7 @@ func (t *SimpleChaincode) queryTest(stub shim.ChaincodeStubInterface, args []str
 
 	rowChannel, err := stub.GetRows("UserData", keys)
 	if err != nil {
+		logger.Debugf("cclog getRows operation failed. %s", err)
 		return nil, fmt.Errorf("getRows operation failed. %s", err)
 	}
 	logger.Debugf("cclog finished call stub.GetRows")
