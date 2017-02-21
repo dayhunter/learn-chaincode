@@ -656,3 +656,44 @@ func cleanTrades(stub shim.ChaincodeStubInterface)(err error){
 	fmt.Println("- end clean trades")
 	return nil
 }
+// ============================================================================================================================
+// GetRow - Our entry point for Queries
+// ============================================================================================================================
+func (t *SimpleChaincode) queryTest(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	logger.Debugf("cclog %v", args)
+
+	userid := "sally1111"
+	dataitem := "monitored_data"
+
+	var keys = []shim.Column{}
+	keyUser := shim.Column{Value: &shim.Column_String_{String_: userid}}
+	keyData := shim.Column{Value: &shim.Column_String_{String_: dataitem}}
+
+	keys = append(keys, keyUser)
+	keys = append(keys, keyData)
+
+	rowChannel, err := stub.GetRows("UserData", keys)
+	if err != nil {
+		return nil, fmt.Errorf("getRows operation failed. %s", err)
+	}
+	logger.Debugf("cclog finished call stub.GetRows")
+	var rows []shim.Row
+	for {
+		select {
+		case row, ok := <-rowChannel:
+			if !ok {
+				rowChannel = nil
+			} else {
+				rows = append(rows, row)
+				logger.Debugf("count = %v", len(rows))
+			}
+		}
+		if rowChannel == nil {
+			break
+		}
+	}
+	logger.Debugf("cclog finished get row")
+	logger.Debugf("total count = %v", len(rows))
+
+	return nil, nil
+}
